@@ -1,4 +1,4 @@
-import FilterView from '../view/filters-view.js';
+import FilterView from './view/filters-view.js';
 import Presenter from './presenter/main-presenter.js';
 import PointsModel from './model/main-model.js';
 import { getPoints, getDestinations, getOffersByType } from './mock/points-mock.js';
