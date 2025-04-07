@@ -2,7 +2,7 @@ import FilterView from './view/filters-view.js';
 import Presenter from './presenter/main-presenter.js';
 import PointsModel from './model/main-model.js';
 import { getPoints, getDestinations, getOffersByType } from './mock/points-mock.js';
-import { render } from './render.js';
+import { render } from './framework/render.js';
 
 
 const filterContainer = document.querySelector('.trip-controls__filters');
