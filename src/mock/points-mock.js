@@ -1,4 +1,4 @@
-import { getRandomInteger, getRandomElement } from '../util.js';
+import { getRandomInteger, getRandomElement } from '../presenter/util.js';
 import dayjs from 'dayjs';
 
 const POINTS_COUNT = 10;
