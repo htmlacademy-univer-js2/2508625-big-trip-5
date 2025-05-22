@@ -74,3 +74,4 @@ export default class TripPointPresenter {
     render(tripPointComponent, this.#tripPointsList.element);
   };
 }
+

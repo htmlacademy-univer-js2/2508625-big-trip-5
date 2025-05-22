@@ -13,11 +13,12 @@ export default class TripPointsModel {
     return this.#tripPoints;
   }
 
-  get Destinations() {
+  get destinations() {
     return this.#destinations;
   }
 
-  get Offers() {
+  get offers() {
     return this.#offers;
   }
+
 }
