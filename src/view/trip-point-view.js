@@ -67,6 +67,7 @@ export default class TripPointView extends AbstractView{
     this.#tripPoint = tripPoint;
     this.#destination = destination;
     this.#offers = offers;
+    this._callback = {};
   }
 
   get template() {
