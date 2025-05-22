@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getDateTime } from '../presenter/util.js';
+import { getDateTime } from '../presenter/main-util-presenter.js';
 
 const renderDestinationPictures = (pictures) => {
   let result = '';
