@@ -1,21 +1,25 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import {humanizePointDueDate, duration, getDate, getTime } from '../presenter/util.js';
+import { humanizeTripPointDueDate, getDuration, getDate, getTime } from '../utils.js';
 
 const renderOffers = (allOffers, checkedOffers) => {
-  let result = '';
-  allOffers.forEach((offer) => {
+  if (!allOffers) {
+    return '';
+  }
+
+  return allOffers.reduce((result, offer) => {
     if (checkedOffers.includes(offer.id)) {
-      result = `${result}<li class="event__offer"><span class="event__offer-title">${offer.title}</span>&plus;&euro;&nbsp;<span class="event__offer-price">${offer.price}</span></li>`;
+      return `${result}<li class="event__offer"><span class="event__offer-title">${offer.title}</span>&plus;&euro;&nbsp;<span class="event__offer-price">${offer.price}</span></li>`;
     }
-  });
-  return result;
+    return result;
+  }, '');
 };
-const createPointTemplate = (point, destinations, offers) => {
-  const {basePrice, type, destinationId, isFavorite, dateFrom, dateTo, offerIds} = point;
-  const allPointTypeOffers = offers.find((offer) => offer.type === type);
-  const eventDuration = duration(dateFrom, dateTo);
-  const startDate = dateFrom !== null ? humanizePointDueDate(dateFrom) : '';
-  const endDate = dateTo !== null ? humanizePointDueDate(dateTo) : '';
+
+const createTripPointTemplate = (tripPoint, destinations, offers) => {
+  const { basePrice, type, destinationId, isFavorite, dateFrom, dateTo, offerIds } = tripPoint;
+  const allTripPointTypeOffers = offers.find((offer) => offer.type === type);
+  const eventDuration = getDuration(dateFrom, dateTo);
+  const startDate = dateFrom !== null ? humanizeTripPointDueDate(dateFrom) : '';
+  const endDate = dateTo !== null ? humanizeTripPointDueDate(dateTo) : '';
   return (
     `<li class="trip-events__item">
       <div class="event">
@@ -37,7 +41,7 @@ const createPointTemplate = (point, destinations, offers) => {
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        ${renderOffers(allPointTypeOffers.offers, offerIds)}
+        ${renderOffers(allTripPointTypeOffers.offers, offerIds)}
       </ul>
       <button class="event__favorite-btn ${isFavorite ? 'event__favorite-btn--active' : ''}" type="button">
       <span class="visually-hidden">Add to favorite</span>
@@ -52,31 +56,31 @@ const createPointTemplate = (point, destinations, offers) => {
     </li>`
   );
 };
-export default class PointEdit extends AbstractView{
 
-  #point = null;
+export default class TripPointView extends AbstractView{
+  #tripPoint = null;
   #destination = null;
   #offers = null;
 
-  constructor(point, destination, offers){
+  constructor(tripPoint, destination, offers) {
     super();
-    this.#point = point;
+    this.#tripPoint = tripPoint;
     this.#destination = destination;
     this.#offers = offers;
+    this._callback = {};
   }
 
-  get template(){
-    return createPointTemplate(this.#point, this.#destination, this.#offers);
+  get template() {
+    return createTripPointTemplate(this.#tripPoint, this.#destination, this.#offers);
   }
-
 
   setEditClickHandler = (callback) => {
-    this._callback.click = callback;
+    this._callback.editClick = callback;
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   };
 
   #editClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.click();
+    this._callback.editClick();
   };
 }

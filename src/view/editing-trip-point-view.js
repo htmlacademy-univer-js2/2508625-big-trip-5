@@ -1,6 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { getDateTime } from '../presenter/util.js';
-
+import { getDateTime } from '../utils.js';
 const renderDestinationPictures = (pictures) => {
   let result = '';
   pictures.forEach((picture) => {
@@ -8,6 +7,7 @@ const renderDestinationPictures = (pictures) => {
   });
   return result;
 };
+
 const renderOffers = (allOffers, checkedOffers) => {
   let result = '';
   allOffers.forEach((offer) => {
@@ -24,9 +24,10 @@ const renderOffers = (allOffers, checkedOffers) => {
   });
   return result;
 };
-const createEditingFormTemplate = (point, destinations, offers) => {
-  const {basePrice, type, destinationId, dateFrom, dateTo, offerIds} = point;
-  const allPointTypeOffers = offers.find((offer) => offer.type === type);
+
+const createEditingTripPointTemplate = (tripPoint, destinations, offers) => {
+  const {basePrice, type, destinationId, dateFrom, dateTo, offerIds} = tripPoint;
+  const allTripPointTypeOffers = offers.find((offer) => offer.type === type);
   return (
     `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -113,55 +114,56 @@ const createEditingFormTemplate = (point, destinations, offers) => {
       <section class="event__details">
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-          ${renderOffers(allPointTypeOffers.offers, offerIds)}
+          ${renderOffers(allTripPointTypeOffers.offers, offerIds)}
         </section>
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destinations[destinationId].description}</p>
-            <div class="event__photos-container">
-                        <div class="event__photos-tape">
-                        ${renderDestinationPictures(destinations[destinationId].pictures)}
+          <p class="event__destination-description">${destinations[destinationId].description}</p>
+          <div class="event__photos-container">
+                      <div class="event__photos-tape">
+                      ${renderDestinationPictures(destinations[destinationId].pictures)}
                       </div>
                     </div>
         </section>
+      </section>
     </form>
   </li>`
   );
 };
 
-export default class FormEdit extends AbstractView {
-  #point = null;
+export default class EditingTripPointView extends AbstractView {
+  #tripPoint = null;
   #destination = null;
   #offers = null;
 
-  constructor(point, destination, offers) {
+  constructor(tripPoint, destination, offers) {
     super();
-    this.#point = point;
+    this.#tripPoint = tripPoint;
     this.#destination = destination;
     this.#offers = offers;
   }
 
   get template() {
-    return createEditingFormTemplate(this.#point, this.#destination, this.#offers);
+    return createEditingTripPointTemplate(this.#tripPoint, this.#destination, this.#offers);
   }
 
-  setPointClickHandler(callback) {
-    this._callback.click = callback;
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#pointClickHandler);
-  }
-
-  setSubmitHandler(callback) {
-    this._callback.click = callback;
-    this.element.querySelector('form').addEventListener('submit', this.#submitHandler);
-  }
-
-  #pointClickHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.click();
+  setPreviewClickHandler = (callback) => {
+    this._callback.previewClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#previewClickHandler);
   };
 
-  #submitHandler = (evt) => {
+  #previewClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.click();
+    this._callback.previewClick();
+  };
+
+  setFormSubmitHandler = (callback) => {
+    this._callback.formSubmit = callback;
+    this.element.querySelector('.event__save-btn').addEventListener('click', this.#formSubmitHandler);
+  };
+
+  #formSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.formSubmit();
   };
 }
