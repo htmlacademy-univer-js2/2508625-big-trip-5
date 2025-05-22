@@ -1,33 +1,29 @@
-const TRIP_POINTS_COUNT = 20;
+import { pointFuture, pointPast, pointPresent } from './utils';
 
-const TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
-
-const DESTINATION = ['Amsterdam', 'Chamonix', 'Geneva', 'London','Helsinki','Oslo','Den Haag','Moscow'];
-
-const DESCRIPTIONS = ['Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  'Cras aliquet varius magna, non porta ligula feugiat eget.',
-  'Fusce tristique felis at fermentum pharetra.',
-  'Aliquam id orci ut lectus varius viverra.',
-  'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.',
-  'Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum.',
-  'Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui.',
-  'Sed sed nisi sed augue convallis suscipit in sed felis.',
-  'Aliquam erat volutpat.',
-  'Nunc fermentum tortor ac porta dapibus.',
-  'In rutrum ac purus sit amet tempus.'];
-
-const ElementsCount = {
-  MIN: 1,
-  MAX: 4
+export const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
 };
 
-const PictureNumber = {
-  MIN: 0,
-  MAX: 10
+export const POINT_TYPE = ['taxi', 'bus', 'ship', 'train', 'flight', 'drive', 'check-in', 'sightseeing', 'restaurant'];
+export const DATE_FORMAT = {
+  'full-date': 'YYYY-MM-DD',
+  'month-day': 'MMM DD',
+  'hours-minutes': 'HH:mm',
+  'full-date-and-time': 'YYYY-MM-DDTHH:MM',
+  'full-date-and-time-slash': 'DD/MM/YYYY HH:mm',
 };
 
-const Price = {
-  MIN: 100,
-  MAX: 1000
+export const FILTER_TYPES = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past',
 };
-export{TRIP_POINTS_COUNT, TYPES, DESTINATION, DESCRIPTIONS, ElementsCount, PictureNumber, Price};
+
+export const FILTER_GENERATOR = {
+  [FILTER_TYPES.EVERYTHING]: (points) => [...points],
+  [FILTER_TYPES.PAST]: (points) => points.filter((point) => pointPast(point)),
+  [FILTER_TYPES.PRESENT]: (points) => points.filter((point) => pointPresent(point)),
+  [FILTER_TYPES.FUTURE]: (points) => points.filter((point) => pointFuture(point)),
+};
