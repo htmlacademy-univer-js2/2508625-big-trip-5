@@ -2,7 +2,7 @@ import { render } from './framework/render.js';
 import FiltersView from './view/filters-view.js';
 import TripPointPresenter from './presenter/trip-point-presenter.js';
 import TripPointsModel from './model/main-model.js';
-import { getTripPoints, getDestinations, getOffersByType } from './mock/po.js';
+import { getTripPoints, getDestinations, getOffersByType } from './mock/points-mock.js';
 import { generateFilter } from './mock/filters-mock.js';
 
 const siteHeaderElement = document.querySelector('.trip-main');
