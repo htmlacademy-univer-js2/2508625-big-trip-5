@@ -1,8 +1,8 @@
-import { filter } from '../presenter/filters-util-presenter.js';
+import { filter } from '../utils.js';
 
-export const generateFilter = (points) => Object.entries(filter).map(
-  ([filterName, filterPoints]) => ({
+export const generateFilter = (tripPoints) => Object.entries(filter).map(
+  ([filterName, filterTripPoints]) => ({
     name: filterName,
-    count: filterPoints(points).length,
+    count: filterTripPoints(tripPoints).length,
   }),
 );

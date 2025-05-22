@@ -1,23 +1,23 @@
-export default class PointsModel {
-  constructor() {
-    this.points = [];
+export default class TripPointsModel {
+  #tripPoints = [];
+  #destinations = [];
+  #offers = [];
+
+  init(tripPoints, destinations, offers) {
+    this.#tripPoints = tripPoints;
+    this.#destinations = destinations;
+    this.#offers = offers;
   }
 
-  init(points, destinations, offers) {
-    this.points = points;
-    this.destinations = destinations;
-    this.offers = offers;
+  get tripPoints() {
+    return this.#tripPoints;
   }
 
-  getPoints() {
-    return this.points;
+  get Destinations() {
+    return this.#destinations;
   }
 
-  getDestinations() {
-    return this.destinations;
-  }
-
-  getOffers() {
-    return this.offers;
+  get Offers() {
+    return this.#offers;
   }
 }
