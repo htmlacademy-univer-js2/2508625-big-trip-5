@@ -1,9 +1,9 @@
-import TripPointView from '../view/point-view.js';
-import EditingTripPointView from '../view/edit-trip-point-view.js';
-import SortView from '../view/sorting-view.js';
+import TripPointView from '../view/trip-point-view.js';
+import EditingTripPointView from '../view/editing-trip-point-view.js';
+import SortView from '../view/sort-view.js';
 import { render, replace } from '../framework/render.js';
-import PointListEdit from '../view/point-list-view.js';
-import WithoutPointView from '../view/without-point-view.js';
+import TripPointListView from '../view/trip-point-list-view.js';
+import NoTripPointView from '../view/no-trip-point-view.js';
 
 export default class TripPointPresenter {
   #tripPointsList = null;
@@ -14,7 +14,7 @@ export default class TripPointPresenter {
   #offers = null;
 
   constructor(tripContainer) {
-    this.#tripPointsList = new PointListEdit();
+    this.#tripPointsList = new TripPointListView();
     this.#tripContainer = tripContainer;
   }
 
@@ -25,8 +25,8 @@ export default class TripPointPresenter {
     this.#offers = [...this.#tripPointsModel.offers];
 
     if (this.#tripPoints.length === 0) {
-      render(new WithoutPointView(), this.#tripContainer);
-    } else {
+      render(new NoTripPointView(), this.#tripContainer);
+    }else {
       render(new SortView(), this.#tripContainer);
       render(this.#tripPointsList, this.#tripContainer);
       for (const tripPoint of this.#tripPoints){
@@ -74,4 +74,3 @@ export default class TripPointPresenter {
     render(tripPointComponent, this.#tripPointsList.element);
   };
 }
-
