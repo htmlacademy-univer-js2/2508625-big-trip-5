@@ -1,7 +1,7 @@
 import AbstractView from '../framework/view/abstract-view';
 import { formateDate } from '../utils';
 import { DATE_FORMAT } from '../const';
-const MAX_DESTINATIONS_TO_RENDER = 3;
+const MAX_DESTINATIONS_TO_RENDER = 5;
 
 function createTripInfoTemplate({totalPrice, destinationNames, points}) {
   const destinations = Array.from(new Set(destinationNames));

@@ -1,7 +1,6 @@
 import PointsList from '../view/points-list-view.js';
 import { render } from '../framework/render.js';
 import Sort from '../view/sort-view.js';
-//import { generateFilters } from '../mock/filters-mock.js';
 import Filter from '../view/filters-view.js';
 import { updateItem } from '../utils.js';
 import PointsPresenter from './points-presenter.js';
@@ -27,9 +26,11 @@ export default class Presenter {
   }
 
   init() {
-    this.points = this.#sortPoints(this.#pointsModel.getPoints());
-    this.destinations = this.#destinationModel.getDestinations();
-    this.offers = this.#offersModel.getOffers();
+    const points = this.#pointsModel.getPoints();
+    const destinations = this.#destinationModel.getDestinations();
+
+    this.points = this.#sortPoints(points);
+    this.destinations = destinations;
     this.renderPage();
   }
 
@@ -37,7 +38,7 @@ export default class Presenter {
     this.#renderSort();
     this.#renderFilter();
     render(this.#pointsListComponent, this.#eventsContainer);
-    this.#renderPoint();
+    this.#renderPoints();
   }
 
   #renderSort() {
@@ -48,20 +49,26 @@ export default class Presenter {
     render(new Filter({points: this.eventsList}), this.#filterContainer);
   }
 
-  #renderPoint() {
+  #renderPoints() {
     this.#pointsPresenter = new PointsPresenter({
-      pointsModel: this.#pointsModel,
+      pointsListView: this.#pointsListComponent,
+      eventsContainer: this.#eventsContainer,
       destinationModel: this.#destinationModel,
       offersModel: this.#offersModel,
-      pointsListView: this.#pointsListComponent,
-      eventsContainer: this.#eventsContainer
+      pointsModel: this.#pointsModel,
+      onDataChange: this.handleEventChange,
+      onModeChange: this.#handleModeChange
     });
     this.#pointsPresenter.init();
   }
 
   handleEventChange = (updatedPoint) => {
-    this.points = updateItem(this.points);
-    this.#pointsPresenter.updatedPoint(updatedPoint);
+    this.points = updateItem(this.points, updatedPoint);
+    this.#pointsPresenter.updatePoint(updatedPoint);
+  };
+
+  #handleModeChange = () => {
+    this.#pointsPresenter.resetView();
   };
 
   #clearPointsBoard() {
@@ -76,7 +83,7 @@ export default class Presenter {
       this.#sortType = evt.target.dataset.sortType;
       this.points = this.#sortPoints(this.#pointsModel.getPoints());
       this.#clearPointsBoard();
-      this.#renderPoint();
+      this.#renderPoints();
     }
   };
 

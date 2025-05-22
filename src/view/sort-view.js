@@ -42,4 +42,3 @@ export default class SortingView extends AbstractView {
     this.#handleSortBtnClick(evt);
   };
 }
-
