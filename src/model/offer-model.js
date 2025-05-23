@@ -1,24 +1,15 @@
-import { offers } from '../mock/offers-mock.js';
+import {offers} from '../mock/offers-mock.js';
 
 export default class OffersModel {
-  #offers = offers;
-
   constructor() {
-    this.#offers = offers;
+    this.offers = [];
   }
 
-  get allOffers() {
-    return this.#offers.reduce((acc, offerGroup) => {
-      acc[offerGroup.type] = offerGroup.offers;
-      return acc;
-    }, {});
+  init() {
+    this.offers = offers;
   }
 
-  getOffersByType(type) {
-    if (!this.#offers || !Array.isArray(this.#offers)) {
-      return [];
-    }
-    const offerGroup = this.#offers.find((group) => group.type === type);
-    return offerGroup?.offers || [];
+  getOffers() {
+    return this.offers;
   }
 }

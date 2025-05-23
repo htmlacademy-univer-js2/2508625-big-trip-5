@@ -1,8 +1,6 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import objectSupport from 'dayjs/plugin/objectSupport';
-import { SortTypes } from './const';
-
 
 dayjs.extend(utc);
 dayjs.extend(objectSupport);
@@ -24,15 +22,30 @@ const getDuration = (dateFrom, dateTo) => {
   }
 };
 
+const isPointPast = (point) => dayjs().isAfter(dayjs(point.dateTo));
 
-const updateItem = (items, update) => items.map((item) => item.id === update.id ? update : item);
+const isPointFuture = (point) => dayjs().isBefore(dayjs(point.dateFrom));
+
+const isPointPresent = (point) => dayjs().isAfter(dayjs(point.dateFrom)) && dayjs().isBefore(dayjs(point.dateTo));
+
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-const sort = {
-  [SortTypes.DAY]: (points) => points.sort((a, b) => dayjs(a.dateFrom).diff(dayjs(b.dateFrom))),
-  [SortTypes.PRICE]: (points) => points.sort((a, b) => b.price - a.price),
-  [SortTypes.TIME]: (points) => points.sort((a, b) => dayjs(b.dateTo).diff(dayjs(b.dateFrom)) - dayjs(a.dateTo).diff(dayjs(a.dateFrom))
-  )
-};
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
 
-export {formateDate, getDuration, updateItem, isEscapeKey, sort};
+function sortPointsByDate(pointA, pointB) {
+  return dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
+}
+
+function sortPointsByTime(pointA, pointB) {
+  const pointADur = dayjs(pointA.dateTo).diff(dayjs(pointA.dateFrom), 'minute');
+  const pointBDur = dayjs(pointB.dateTo).diff(dayjs(pointB.dateFrom), 'minute');
+  return pointBDur - pointADur;
+}
+
+function sortPointsByPrice(pointA, pointB) {
+  return pointB.basePrice - pointA.basePrice;
+}
+
+export {formateDate, getDuration, isPointFuture, isPointPast, isPointPresent, isEscapeKey, updateItem, sortPointsByDate, sortPointsByPrice, sortPointsByTime};

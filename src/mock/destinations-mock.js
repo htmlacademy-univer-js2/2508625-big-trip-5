@@ -1,24 +1,24 @@
 export const destinations = [
   {
     id: 1,
-    description: 'GOOD CITY <3',
+    description: 'Very beatiful city with bad drivers',
     name: 'Ekaterinburg',
     pictures: []
   },
   {
     id: 2,
-    description: '$$$$$$$',
-    name: 'Monaco',
+    description: 'Both city and country',
+    name: 'Luxembourg',
     pictures: [
       {
         src: `https://loremflickr.com/248/152?random=${Math.random(10)}`,
-        description: 'View of Monaco'
+        description: 'View of Luxembourg'
       }
     ]
   },
   {
     id: 3,
-    description: 'The capital of Great Britain',
+    description: 'The capital of Greate Britan',
     name: 'London',
     pictures: [
       {

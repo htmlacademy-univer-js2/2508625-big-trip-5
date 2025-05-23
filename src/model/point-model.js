@@ -1,13 +1,15 @@
-import { points } from '../mock/points-mock.js';
+import {points} from '../mock/points-mock.js';
 
 export default class PointsModel {
-  #points = [];
+  constructor() {
+    this.points = [];
+  }
 
   init() {
-    this.#points = points;
+    this.points = points;
   }
 
   getPoints() {
-    return this.#points;
+    return this.points;
   }
 }
