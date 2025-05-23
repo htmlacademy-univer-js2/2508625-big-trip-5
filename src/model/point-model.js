@@ -1,4 +1,4 @@
-import { points } from '../mock/points-mock.js';
+import {points} from '../mock/points-mock.js';
 
 export default class PointsModel {
   constructor() {

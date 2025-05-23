@@ -5,12 +5,12 @@ export const offers = [
       {
         id: 1,
         title: 'Business class',
-        price: 322
+        price: 100
       },
       {
         id: 2,
         title: 'Golden driver',
-        price: 1337
+        price: 250
       }
     ]
   },
@@ -20,7 +20,7 @@ export const offers = [
       {
         id: 1,
         title: 'Plane for your own',
-        price: 5000
+        price: 9999
       }
     ]
   },
@@ -30,7 +30,7 @@ export const offers = [
       {
         id: 1,
         title: 'King-size bed',
-        price: 192
+        price: 50
       }
     ]
   }

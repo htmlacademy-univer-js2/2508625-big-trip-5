@@ -1,8 +1,7 @@
+import {generateFilters} from '../mock/filters-mock.js';
+import Filters from '../view/filters-view.js';
 import PointsList from '../view/points-list-view.js';
 import { render } from '../framework/render.js';
-import Sort from '../view/sort-view.js';
-import { generateFilters } from '../mock/filters-mock.js';
-import Filter from '../view/filters-view.js';
 import { updateItem } from '../utils.js';
 import PointsPresenter from './points-presenter.js';
 
@@ -10,55 +9,52 @@ export default class Presenter {
   #eventsContainer = null;
   #filterContainer = null;
   #pointsModel = null;
-  #destinationModel = null;
+  #destinationsModel = null;
   #offersModel = null;
+  #pointsListViewComponent = new PointsList();
   #pointsPresenter = null;
-  #pointsListComponent = new PointsList();
 
-  constructor({eventsContainer, filterContainer, pointsModel, destinationModel, offersModel}) {
+  constructor({eventsContainer, filtersContainer, pointsModel, destinationsModel, offersModel}) {
+    this.#filterContainer = filtersContainer;
     this.#eventsContainer = eventsContainer;
-    this.#filterContainer = filterContainer;
     this.#pointsModel = pointsModel;
-    this.#destinationModel = destinationModel;
+    this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
   }
 
   init() {
     this.points = this.#pointsModel.getPoints();
-    this.destinations = this.#destinationModel.getDestinations();
+    this.destinations = this.#destinationsModel.getDestinations();
     this.offers = this.#offersModel.getOffers();
+
     this.renderPage();
   }
 
   renderPage() {
-    this.#renderSort();
-    this.#renderFilter();
-    render(this.#pointsListComponent, this.#eventsContainer);
-    this.#renderPoint();
+    this.#renderFilters();
+
+    render(this.#pointsListViewComponent, this.#eventsContainer);
+    this.#renderPoints();
   }
 
-  #renderSort() {
-    render(new Sort(), this.#eventsContainer);
-  }
-
-  #renderFilter() {
-    const filters = generateFilters(this.points);
-    render(new Filter({filters}), this.#filterContainer);
-  }
-
-  #renderPoint() {
+  #renderPoints() {
     this.#pointsPresenter = new PointsPresenter({
       pointsModel: this.#pointsModel,
-      destinationModel: this.#destinationModel,
+      destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
-      pointsListView: this.#pointsListComponent,
+      pointsListView: this.#pointsListViewComponent,
       eventsContainer: this.#eventsContainer
     });
     this.#pointsPresenter.init();
   }
 
   handleEventChange = (updatedPoint) => {
-    this.points = updateItem(this.points);
-    this.#pointsPresenter.updatedPoint(updatedPoint);
+    this.points = updateItem(this.points, updatedPoint);
+    this.#pointsPresenter.updatePoint(updatedPoint);
   };
+
+  #renderFilters() {
+    const filters = generateFilters(this.points);
+    render(new Filters({filters}), this.#filterContainer);
+  }
 }

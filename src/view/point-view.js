@@ -1,8 +1,8 @@
-import AbstractView from '../framework/view/abstract-view';
 import { formateDate, getDuration } from '../utils.js';
 import { DATE_FORMAT } from '../const.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
-function createRoutePointTemplate(point, destinations, offers) {
+function createPointTemplate(point, destinations, offers) {
   const {basePrice, dateFrom, dateTo, isFavorite, type} = point;
   const pointDestination = destinations.find((d) => d.id === point.destination);
   const pointOffers = offers.find((offer) => offer.type === type).offers.filter((offer) => point.offers.includes(offer.id));
@@ -46,59 +46,31 @@ function createRoutePointTemplate(point, destinations, offers) {
             </li>`;
 }
 
-export default class routePoint extends AbstractView {
+export default class PointView extends AbstractView {
   #point;
   #destinations;
   #offers;
-  #onEditClick = null;
-  #handleFavoriteBtnClick = null;
+  #handleEdit;
+  #handleFavorite;
 
   constructor({point, destinations, offers, onEditClick, onFavoriteClick}) {
     super();
     this.#point = point;
     this.#destinations = destinations;
     this.#offers = offers;
-    this.#onEditClick = onEditClick;
-    this.#handleFavoriteBtnClick = onFavoriteClick;
+    this.#handleEdit = onEditClick;
+    this.#handleFavorite = onFavoriteClick;
 
-    this.#addEventListeners();
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#handleEdit);
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', this.#favoriteClickHandler);
   }
-
-  get template() {
-    return createRoutePointTemplate(this.#point, this.#destinations, this.#offers);
-  }
-
-  #addEventListeners() {
-    const editButton = this.element.querySelector('.event__rollup-btn');
-    const favoriteButton = this.element.querySelector('.event__favorite-btn');
-
-    if (editButton) {
-      editButton.addEventListener('click', this.#editClickHandler);
-    }
-    if (favoriteButton) {
-      favoriteButton.addEventListener('click', this.#favoriteClickHandler);
-    }
-  }
-
-  #editClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#onEditClick();
-  };
 
   #favoriteClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFavoriteBtnClick();
+    this.#handleFavorite();
   };
 
-  removeEventListeners() {
-    const editButton = this.element.querySelector('.event__rollup-btn');
-    const favoriteButton = this.element.querySelector('.event__favorite-btn');
-
-    if (editButton) {
-      editButton.removeEventListener('click', this.#editClickHandler);
-    }
-    if (favoriteButton) {
-      favoriteButton.removeEventListener('click', this.#favoriteClickHandler);
-    }
+  get template() {
+    return createPointTemplate(this.#point, this.#destinations, this.#offers);
   }
 }

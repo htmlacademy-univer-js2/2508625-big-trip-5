@@ -1,40 +1,40 @@
-import { render, replace, remove } from '../framework/render';
-import routePoint from '../view/rout-point-view';
-import editForm from '../view/edit-form-view';
-import { Mode } from '../const';
-import { isEscapeKey } from '../utils';
+import PointView from '../view/point-view.js';
+import EditForm from '../view/edit-form-view.js';
+import { remove, render, replace } from '../framework/render.js';
+import { isEscapeKey } from '../utils.js';
+
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+};
 
 export default class PointPresenter {
   #pointListContainer = null;
-  #pointComponent = null;
-  #pointEditComponent = null;
-  #point = null;
   #handleDataChange = null;
   #handleModeChange = null;
-  #mode = Mode.DEFAULT;
   #offers = [];
   #destinations = [];
 
-  constructor({
-    pointListContainer,
-    offers,
-    destinations,
-    onDataChange,
-    onModeChange
-  }) {
+  #point = null;
+  #pointComponent = null;
+  #editFormComponent = null;
+  #mode = Mode.DEFAULT;
+
+  constructor({pointListContainer, offers, destinations, onDataChange, onModeChange}) {
     this.#pointListContainer = pointListContainer;
-    this.#destinations = destinations;
     this.#offers = offers;
+    this.#destinations = destinations;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
 
   init(point) {
     this.#point = point;
-    const prevPointComponent = this.#pointComponent;
-    const prevPointEditComponent = this.#pointEditComponent;
 
-    this.#pointComponent = new routePoint({
+    const prevPointComponent = this.#pointComponent;
+    const prevEditFormComponent = this.#editFormComponent;
+
+    this.#pointComponent = new PointView({
       point: this.#point,
       destinations: this.#destinations,
       offers: this.#offers,
@@ -42,19 +42,20 @@ export default class PointPresenter {
         this.#replacePoint();
         document.addEventListener('keydown', this.#onEscKeyDownClose);
       },
-      onFavoriteClick: this.#handleFavoriteClick
+      onFavoriteClick: this.#handleFavoriteClick,
     });
-    this.#pointEditComponent = new editForm({
+
+    this.#editFormComponent = new EditForm({
       point: this.#point,
-      destinations: this.#destinations || [],
-      offers: this.#offers || [],
+      offers: this.#offers,
+      destinations: this.#destinations,
       onFormSubmit: () => {
         this.#handleSubmit(this.#point);
         document.removeEventListener('keydown', this.#onEscKeyDownClose);
       },
     });
 
-    if (prevPointComponent === null || prevPointEditComponent === null) {
+    if (prevPointComponent === null || prevEditFormComponent === null) {
       render(this.#pointComponent, this.#pointListContainer);
       return;
     }
@@ -64,27 +65,27 @@ export default class PointPresenter {
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#pointEditComponent, prevPointEditComponent);
+      replace(this.#editFormComponent, prevEditFormComponent);
     }
 
     remove(prevPointComponent);
-    remove(prevPointEditComponent);
+    remove(prevEditFormComponent);
   }
 
   #replacePoint() {
-    replace(this.#pointEditComponent, this.#pointComponent);
+    replace(this.#editFormComponent, this.#pointComponent);
     this.#handleModeChange();
     this.#mode = Mode.EDITING;
   }
 
   #replaceEditForm() {
-    replace(this.#pointComponent, this.#pointEditComponent);
+    replace(this.#pointComponent, this.#editFormComponent);
     document.removeEventListener('keydown', this.#onEscKeyDownClose);
     this.#mode = Mode.DEFAULT;
   }
 
   #onEscKeyDownClose = (evt) => {
-    if (isEscapeKey) {
+    if (isEscapeKey()) {
       evt.preventDefault();
       this.#replaceEditForm();
       document.removeEventListener('keydown', this.#onEscKeyDownClose);
@@ -102,7 +103,7 @@ export default class PointPresenter {
 
   destroy() {
     remove(this.#pointComponent);
-    remove(this.#pointEditComponent);
+    remove(this.#editFormComponent);
   }
 
   resetView() {
