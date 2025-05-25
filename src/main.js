@@ -2,7 +2,7 @@ import EventsPresenter from './presenter/main-presenter.js';
 import TripModel from './model/main-model.js';
 import FilterModel from './model/filter-model.js';
 import FilterPresenter from './presenter/filter-presenter.js';
-import WaypointsApiService from './waypoints-api-service.js'; //тут
+import WaypointsApiService from './api.js';
 
 const AUTHORIZATION = 'Basic d8k0ts8a7cs65t';
 const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';
