@@ -1,114 +1,139 @@
-import PointView from '../view/point-view.js';
-import EditForm from '../view/edit-form-view.js';
-import { remove, render, replace } from '../framework/render.js';
-import { isEscapeKey } from '../utils.js';
+import WaypointView from '../view/point-view.js';
+import EditWaypointView from '../view/edit-form-view.js';
+import {render, replace, remove} from '../framework/render.js';
+import {Mode} from '../const.js';
 
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  EDITING: 'EDITING',
-};
 
-export default class PointPresenter {
-  #pointListContainer = null;
-  #handleDataChange = null;
-  #handleModeChange = null;
-  #offers = [];
-  #destinations = [];
+export default class WaypointPresenter {
+  #eventsListComponent = null;
+
+  #waypointComponent = null;
+  #waypointEditComponent = null;
+  #resetWaypointsMode = null;
+  #updateDestination = null;
+  #updateOffers = null;
 
   #point = null;
-  #pointComponent = null;
-  #editFormComponent = null;
+  #destinationsList = null;
+  #destination = null;
+  #offersList = null;
+  #updateWaypointsData = null;
+
   #mode = Mode.DEFAULT;
 
-  constructor({pointListContainer, offers, destinations, onDataChange, onModeChange}) {
-    this.#pointListContainer = pointListContainer;
-    this.#offers = offers;
-    this.#destinations = destinations;
-    this.#handleDataChange = onDataChange;
-    this.#handleModeChange = onModeChange;
+  constructor({eventsListComponent, updateWaypointsData, resetWaypointsMode, updateDestination, updateOffers}) {
+    this.#eventsListComponent = eventsListComponent;
+    this.#updateWaypointsData = updateWaypointsData;
+    this.#resetWaypointsMode = resetWaypointsMode;
+    this.#updateDestination = updateDestination;
+    this.#updateOffers = updateOffers;
   }
 
-  init(point) {
+
+  init({point, destinationsList, destination, offersList}) {
     this.#point = point;
+    this.#destinationsList = destinationsList;
+    this.#destination = destination;
+    this.#offersList = offersList;
 
-    const prevPointComponent = this.#pointComponent;
-    const prevEditFormComponent = this.#editFormComponent;
+    const prevWaypointComponent = this.#waypointComponent;
+    const prevWaypointEditComponent = this.#waypointEditComponent;
 
-    this.#pointComponent = new PointView({
+    this.#waypointComponent = new WaypointView({
       point: this.#point,
-      destinations: this.#destinations,
-      offers: this.#offers,
-      onEditClick: () => {
-        this.#replacePoint();
-        document.addEventListener('keydown', this.#onEscKeyDownClose);
-      },
-      onFavoriteClick: this.#handleFavoriteClick,
+      offers: this.#offersList,
+      destination: this.#destination,
+      onEditClick: this.#onEditClick,
+      onFavoriteClick: this.#onFavoriteClick,
     });
 
-    this.#editFormComponent = new EditForm({
+    this.#waypointEditComponent = new EditWaypointView({
       point: this.#point,
-      offers: this.#offers,
-      destinations: this.#destinations,
-      onFormSubmit: () => {
-        this.#handleSubmit(this.#point);
-        document.removeEventListener('keydown', this.#onEscKeyDownClose);
-      },
+      offers: this.#offersList,
+      destination: this.#destination,
+      destinationsList: this.#destinationsList,
+      handleFormSumbmit: this.#handleFormSubmit,
+      onCloseForm: this.#onCloseForm,
+      updateDestination: this.#updateDestination,
+      updateOffers: this.#updateOffers,
     });
 
-    if (prevPointComponent === null || prevEditFormComponent === null) {
-      render(this.#pointComponent, this.#pointListContainer);
+    if (prevWaypointComponent === null || prevWaypointEditComponent === null) {
+      render(this.#waypointComponent, this.#eventsListComponent);
       return;
     }
 
     if (this.#mode === Mode.DEFAULT) {
-      replace(this.#pointComponent, prevPointComponent);
+      replace(this.#waypointComponent, prevWaypointComponent);
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#editFormComponent, prevEditFormComponent);
+      replace(this.#waypointEditComponent, prevWaypointEditComponent);
     }
 
-    remove(prevPointComponent);
-    remove(prevEditFormComponent);
+    remove(prevWaypointComponent);
+    remove(prevWaypointEditComponent);
   }
 
-  #replacePoint() {
-    replace(this.#editFormComponent, this.#pointComponent);
-    this.#handleModeChange();
+  destroy() {
+    remove(this.#waypointComponent);
+    remove(this.#waypointEditComponent);
+  }
+
+  resetToDefaultWaypoint() {
+    if (this.#mode === Mode.EDITING) {
+      this.#waypointEditComponent.reset(this.#point, this.#offersList, this.#destination);
+      this.#replaceFormToPoint();
+    }
+  }
+
+  #replacePointToForm() {
+    document.addEventListener('keydown', this.#onEscKeydown);
+    replace(this.#waypointEditComponent, this.#waypointComponent);
+    this.#resetWaypointsMode();
     this.#mode = Mode.EDITING;
   }
 
-  #replaceEditForm() {
-    replace(this.#pointComponent, this.#editFormComponent);
-    document.removeEventListener('keydown', this.#onEscKeyDownClose);
+  #replaceFormToPoint() {
+    document.removeEventListener('keydown', this.#onEscKeydown);
+    replace(this.#waypointComponent, this.#waypointEditComponent);
     this.#mode = Mode.DEFAULT;
   }
 
-  #onEscKeyDownClose = (evt) => {
-    if (isEscapeKey()) {
+  #handleFormSubmit = (updatedWaypoint) => {
+    this.#updateWaypointsData(updatedWaypoint);
+    this.#replaceFormToPoint();
+  };
+
+  #onEscKeydown = (evt) => {
+    if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#replaceEditForm();
-      document.removeEventListener('keydown', this.#onEscKeyDownClose);
+      this.#waypointEditComponent.reset(this.#point, this.#offersList, this.#destination);
+      this.#replaceFormToPoint();
     }
   };
 
-  #handleFavoriteClick = () => {
-    this.#handleDataChange({ ...this.#point, isFavorite: !this.#point.isFavorite });
+  #onEditClick = (evt) => {
+    evt.preventDefault();
+    this.#replacePointToForm();
   };
 
-  #handleSubmit = (point) => {
-    this.#handleDataChange(point);
-    this.#replaceEditForm();
+  #onCloseForm = (evt) => {
+    evt.preventDefault();
+    this.#waypointEditComponent.reset(this.#point, this.#offersList, this.#destination);
+    this.#replaceFormToPoint();
   };
 
-  destroy() {
-    remove(this.#pointComponent);
-    remove(this.#editFormComponent);
-  }
+  #onFavoriteClick = (evt) => {
+    evt.preventDefault();
 
-  resetView() {
-    if (this.#mode !== Mode.DEFAULT) {
-      this.#replaceEditForm();
-    }
-  }
+    const updatedPoint = {...this.#point, isFavorite: !this.#point.isFavorite};
+    const updatedWaypoint = {
+      point: updatedPoint,
+      destination: this.#destination,
+      offersList: this.#offersList,
+    };
+
+    this.#updateWaypointsData(updatedWaypoint);
+  };
 }
