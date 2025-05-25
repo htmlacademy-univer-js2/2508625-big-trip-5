@@ -1,30 +1,17 @@
-export const destinations = [
-  {
-    id: 1,
-    description: 'Very beatiful city with bad drivers',
-    name: 'Ekaterinburg',
-    pictures: []
-  },
-  {
-    id: 2,
-    description: 'Both city and country',
-    name: 'Luxembourg',
-    pictures: [
-      {
-        src: `https://loremflickr.com/248/152?random=${Math.random(10)}`,
-        description: 'View of Luxembourg'
-      }
-    ]
-  },
-  {
-    id: 3,
-    description: 'The capital of Greate Britan',
-    name: 'London',
-    pictures: [
-      {
-        src: `https://loremflickr.com/248/152?random=${Math.random(10)}`,
-        description: 'View of London'
-      }
-    ]
-  }
-];
+import {CITIES, DESCRIPTIONS} from '../const.js';
+import {createId} from '../utils/mock-util.js';
+import {getRandomArrayElement, getRandomNumber} from '../utils/main-util.js';
+
+const generateDestinationId = createId();
+
+const generateDestination = () => ({
+  id: generateDestinationId(),
+  description: Array.from({length: getRandomNumber(1, 5)},() => getRandomArrayElement(DESCRIPTIONS)).join(' '),
+  name: getRandomArrayElement(CITIES),
+  pictures: Array.from({length: getRandomNumber(1, 5)}, () => ({
+    src: `https://loremflickr.com/248/152?${getRandomNumber(1, 1000)}`,
+    description: getRandomArrayElement(DESCRIPTIONS),
+  }))
+});
+
+export {generateDestination};

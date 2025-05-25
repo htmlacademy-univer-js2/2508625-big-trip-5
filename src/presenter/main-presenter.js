@@ -1,60 +1,142 @@
-import {generateFilters} from '../mock/filters-mock.js';
-import Filters from '../view/filters-view.js';
-import PointsList from '../view/points-list-view.js';
-import { render } from '../framework/render.js';
-import { updateItem } from '../utils.js';
-import PointsPresenter from './points-presenter.js';
+import {render} from '../framework/render.js';
+import SortingView from '../view/sort-view.js';
+import EventsListView from '../view/points-list-view.js';
+import NoWaypointsView from '../view/empty-point-list-view.js';
+import WaypointPresenter from './point-presenter.js';
+import {updateItem} from '../utils/main-util.js';
+import {SortType} from '../const.js';
+import {sortByDate, sortByPrice, sortByTime} from '../utils/route-point-util.js';
 
-export default class Presenter {
-  #eventsContainer = null;
-  #filterContainer = null;
-  #pointsModel = null;
-  #destinationsModel = null;
-  #offersModel = null;
-  #pointsListViewComponent = new PointsList();
-  #pointsPresenter = null;
+export default class EventsPresenter {
+  #container = null;
+  #tripModel = null;
 
-  constructor({eventsContainer, filtersContainer, pointsModel, destinationsModel, offersModel}) {
-    this.#filterContainer = filtersContainer;
-    this.#eventsContainer = eventsContainer;
-    this.#pointsModel = pointsModel;
-    this.#destinationsModel = destinationsModel;
-    this.#offersModel = offersModel;
+  #sortingComponent = null;
+  #noWaypointsComponent = new NoWaypointsView();
+  #eventsListComponent = new EventsListView();
+
+  #waypoints = null;
+
+  #waypointPresenters = new Map();
+
+  #currentSort = SortType.DAY;
+
+  constructor(container, tripModel) {
+    this.#container = container;
+    this.#tripModel = tripModel;
   }
 
   init() {
-    this.points = this.#pointsModel.getPoints();
-    this.destinations = this.#destinationsModel.getDestinations();
-    this.offers = this.#offersModel.getOffers();
+    this.#waypoints = [...this.#tripModel.waypoints];
 
-    this.renderPage();
+    this.#renderEvents();
   }
 
-  renderPage() {
-    this.#renderFilters();
-
-    render(this.#pointsListViewComponent, this.#eventsContainer);
-    this.#renderPoints();
-  }
-
-  #renderPoints() {
-    this.#pointsPresenter = new PointsPresenter({
-      pointsModel: this.#pointsModel,
-      destinationsModel: this.#destinationsModel,
-      offersModel: this.#offersModel,
-      pointsListView: this.#pointsListViewComponent,
-      eventsContainer: this.#eventsContainer
+  #updateWaypointsData = (updatedWaypoint) => {
+    this.#waypoints = updateItem(this.#waypoints, updatedWaypoint.point);
+    const destinationsList = this.#tripModel.destinations;
+    this.#waypointPresenters.get(updatedWaypoint.point.id).init({
+      ...updatedWaypoint,
+      destinationsList
     });
-    this.#pointsPresenter.init();
-  }
-
-  handleEventChange = (updatedPoint) => {
-    this.points = updateItem(this.points, updatedPoint);
-    this.#pointsPresenter.updatePoint(updatedPoint);
   };
 
-  #renderFilters() {
-    const filters = generateFilters(this.points);
-    render(new Filters({filters}), this.#filterContainer);
+  #resetWaypointsMode = () => {
+    this.#waypointPresenters.forEach((waypointPresenter) => waypointPresenter.resetToDefaultWaypoint());
+  };
+
+  #destroyWaypoints() {
+    this.#waypointPresenters.forEach((waypointPresenter) => waypointPresenter.destroy());
+    this.#waypointPresenters.clear();
+  }
+
+  #updateDestination = (updatedName) => {
+    const updatedDestination = this.#tripModel.getDestinationByName(updatedName);
+
+    return updatedDestination;
+  };
+
+  #updateOffers = (updatedType) => {
+    const updatedOffers = this.#tripModel.getOffersByType(updatedType);
+
+    return updatedOffers;
+  };
+
+  #renderWaypoint(point, destinationsList, destination, offersList) {
+    const waypointPresenter = new WaypointPresenter({
+      eventsListComponent: this.#eventsListComponent.element,
+      updateWaypointsData: this.#updateWaypointsData,
+      resetWaypointsMode: this.#resetWaypointsMode,
+      updateDestination: this.#updateDestination,
+      updateOffers: this.#updateOffers,
+    });
+
+    waypointPresenter.init({point, destinationsList, destination, offersList});
+    this.#waypointPresenters.set(point.id, waypointPresenter);
+  }
+
+  #renderWaypoints() {
+    const destinationsList = this.#tripModel.destinations;
+
+    this.#waypoints.map((point) => {
+      const destination = this.#tripModel.getDestinationById(point.destination);
+      const offersList = this.#tripModel.getOffersByType(point.type);
+
+      this.#renderWaypoint(point, destinationsList, destination, offersList);
+    });
+  }
+
+  #renderNoWaypoints() {
+    render(this.#noWaypointsComponent, this.#container);
+  }
+
+  #sortWaypoints(sortType) {
+    switch(sortType) {
+      case SortType.TIME:
+        this.#waypoints.sort(sortByTime);
+        break;
+      case SortType.PRICE:
+        this.#waypoints.sort(sortByPrice);
+        break;
+      default:
+        this.#waypoints.sort(sortByDate);
+    }
+
+    this.#currentSort = sortType;
+  }
+
+  #applySort = (sortType) => {
+    if (sortType === this.#currentSort) {
+      return;
+    }
+
+    this.#sortWaypoints(sortType);
+    this.#destroyWaypoints();
+    this.#renderWaypoints();
+  };
+
+  #renderSorting() {
+    this.#sortingComponent = new SortingView({
+      applySort: this.#applySort
+    });
+
+    render(this.#sortingComponent, this.#container);
+  }
+
+  #renderEventsList() {
+    render(this.#eventsListComponent, this.#container);
+  }
+
+  #renderEvents() {
+    if (!this.#waypoints.length) {
+      this.#renderNoWaypoints();
+      return;
+    }
+
+    this.#sortWaypoints(this.#currentSort);
+
+    this.#renderSorting();
+    this.#renderEventsList();
+    this.#renderWaypoints();
   }
 }
