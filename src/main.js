@@ -1,14 +1,22 @@
-import {render} from './framework/render.js';
-import FiltersView from './view/filters-view.js';
 import EventsPresenter from './presenter/main-presenter.js';
 import TripModel from './model/main-model.js';
-import {generateFilters} from './mock/filters-mock.js';
+import FilterModel from './model/filter-model.js';
+import FilterPresenter from './presenter/filter-presenter.js';
 
 const filtersContainer = document.querySelector('.trip-controls__filters');
 const eventsContainer = document.querySelector('.trip-events');
-const tripModel = new TripModel();
-const eventsPresenter = new EventsPresenter(eventsContainer, tripModel);
-const filters = generateFilters(tripModel.waypoints);
+const newWaypointButtonContainer = document.querySelector('.trip-main');
 
-render(new FiltersView({filters}), filtersContainer);
+const tripModel = new TripModel();
+const filterModel = new FilterModel();
+
+const eventsPresenter = new EventsPresenter({
+  eventsContainer,
+  tripModel,
+  filterModel,
+  newWaypointButtonContainer
+});
+const filterPresenter = new FilterPresenter({filtersContainer, filterModel, tripModel});
+
+filterPresenter.init();
 eventsPresenter.init();
