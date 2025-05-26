@@ -10,8 +10,10 @@ const createTripInfoTemplate = (tripRoute, tripDuration, totalCost) => `
   <section class="trip-main__trip-info  trip-info">
     <div class="trip-info__main">
       ${createTripRouteTemplate(tripRoute)}
+
       <p class="trip-info__dates">${tripDuration[0]}&nbsp;&mdash;&nbsp;${tripDuration[1]}</p>
     </div>
+
     <p class="trip-info__cost">
       Total: &euro;&nbsp;<span class="trip-info__cost-value">${totalCost}</span>
     </p>
