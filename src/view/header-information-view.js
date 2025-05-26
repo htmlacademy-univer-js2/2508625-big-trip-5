@@ -11,7 +11,7 @@ const createTripInfoTemplate = (tripRoute, tripDuration, totalCost) => `
     <div class="trip-info__main">
       ${createTripRouteTemplate(tripRoute)}
 
-      <p class="trip-info__dates">${tripDuration[0]}&nbsp;&mdash;&nbsp;${tripDuration[1]}</p>
+      <p class="trip-info__dates">${tripDuration[0]}&nbsp;&mdash;&nbsp;${tripDuration[2]}</p>
     </div>
 
     <p class="trip-info__cost">
