@@ -1,22 +1,23 @@
-import {remove, render} from '../framework/render.js';
+import {remove, render, RenderPosition} from '../framework/render.js';
 import SortingView from '../view/sort-view.js';
 import EventsListView from '../view/points-list-view.js';
 import NoWaypointsView from '../view/empty-point-list-view.js';
 import WaypointPresenter from './point-presenter.js';
 import {FilterType, NewWaypointButtonMode, SortType, TimeLimit, UpdateType, UserAction} from '../const.js';
-import {sortByDate, sortByPrice, sortByTime} from '../utils/route-point-util.js';
+import {getTotalBasePrice, getTripDuration, getTripRouteIds, getWaypointAddOptionalPrice, sortByDate, sortByPrice, sortByTime} from '../utils/route-point-util.js';
 import { filter } from '../utils/filter-util.js';
 import NewWaypointPresenter from './next-point-presenter.js';
 import NewWaypointButton from '../view/point-button-view.js';
 import LoadingView from '../view/load-view.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 import ErrorLoadingView from '../view/error-view.js';
+import TripInfoView from '../view/header-information-view.js';
 
 export default class EventsPresenter {
   #container = null;
   #tripModel = null;
   #filterModel = null;
-  #newWaypointButtonContainer = null;
+  #headerContainer = null;
 
   #sortingComponent = null;
   #noWaypointsComponent = null;
@@ -24,6 +25,7 @@ export default class EventsPresenter {
   #newWaypointButtonComponent = null;
   #loadingComponent = new LoadingView();
   #errorLoadingComponent = new ErrorLoadingView();
+  #tripInfoComponent = null;
 
   #NewWaypointButtonMode = NewWaypointButtonMode.ENABLED;
 
@@ -39,11 +41,11 @@ export default class EventsPresenter {
     upperLimit: TimeLimit.UPPER_LIMIT
   });
 
-  constructor({eventsContainer: container, tripModel, filterModel, newWaypointButtonContainer}) {
+  constructor({eventsContainer: container, tripModel, filterModel, headerContainer}) {
     this.#container = container;
     this.#tripModel = tripModel;
     this.#filterModel = filterModel;
-    this.#newWaypointButtonContainer = newWaypointButtonContainer;
+    this.#headerContainer = headerContainer;
 
     this.#tripModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
@@ -162,6 +164,7 @@ export default class EventsPresenter {
 
     remove(this.#sortingComponent);
     remove(this.#noWaypointsComponent);
+    remove(this.#tripInfoComponent);
 
     if (resetSortType) {
       this.#currentSort = SortType.DAY;
@@ -207,7 +210,7 @@ export default class EventsPresenter {
       onClick: this.#onNewWaypointButtonClick
     });
 
-    render(this.#newWaypointButtonComponent, this.#newWaypointButtonContainer);
+    render(this.#newWaypointButtonComponent, this.#headerContainer);
   }
 
   #renderWaypoint(point, destinationsList, destination, offersList) {
@@ -271,6 +274,29 @@ export default class EventsPresenter {
     render(this.#errorLoadingComponent, this.#container);
   }
 
+  #renderTripInfo() {
+    const defaultWaypoints = this.#tripModel.waypoints;
+
+    const tripRouteIds = getTripRouteIds(defaultWaypoints);
+    const tripRoute = tripRouteIds.map((destinationId) =>
+      this.#tripModel.getDestinationById(destinationId).name);
+
+    const tripDuration = getTripDuration(defaultWaypoints);
+
+    const totalBasePrice = getTotalBasePrice(defaultWaypoints);
+    const totalAddOptionalPrice = defaultWaypoints.reduce((totalPrice, currentWaypoint) => {
+      const offers = this.#tripModel.getOffersByType(currentWaypoint.type);
+      const currentWaypointAddOptionalPrice = getWaypointAddOptionalPrice(currentWaypoint, offers);
+
+      return currentWaypointAddOptionalPrice + totalPrice;
+    }, 0);
+
+    const totalCost = totalBasePrice + totalAddOptionalPrice;
+
+    this.#tripInfoComponent = new TripInfoView({tripRoute, tripDuration, totalCost});
+    render(this.#tripInfoComponent, this.#headerContainer, RenderPosition.AFTERBEGIN);
+  }
+
   #renderEvents() {
     if (this.#isError) {
       this.#renderErrorLoading();
@@ -293,7 +319,7 @@ export default class EventsPresenter {
       this.#renderNoWaypoints();
       return;
     }
-
+    this.#renderTripInfo();
     this.#renderSorting();
     this.#renderEventsList();
     this.#renderWaypoints();
@@ -307,3 +333,5 @@ export default class EventsPresenter {
     this.#renderNewWaypointButton();
   };
 }
+
+
