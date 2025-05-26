@@ -319,7 +319,7 @@ export default class EventsPresenter {
       this.#renderNoWaypoints();
       return;
     }
-
+    this.#renderTripInfo();
     this.#renderSorting();
     this.#renderEventsList();
     this.#renderWaypoints();
@@ -328,9 +328,10 @@ export default class EventsPresenter {
   #onNewWaypointButtonClick = (evt) => {
     evt.preventDefault();
 
-    this.#renderTripInfo();
     this.#createWaypoint();
     this.#NewWaypointButtonMode = NewWaypointButtonMode.DISABLED;
     this.#renderNewWaypointButton();
   };
 }
+
+
